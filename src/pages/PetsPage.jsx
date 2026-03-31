@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components";
 import { getPets } from "../services/api";
-import axios from "axios";
 import PetCard from "../components/PetCard";
+import { color } from "../styles/themeHelpers";
+
+
+const Header = styled.h1`
+  color: ${color("primary")};
+  margin-bottom: 16px;
+`;
 
 export default function PetsPage() {
   const [pets, setPets] = useState([]);
@@ -10,12 +17,11 @@ export default function PetsPage() {
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        console.log("Fetching pets...");
-        const response = await getPets();  
+        const response = await getPets();
         setPets(response.data);
       } catch (err) {
         console.error("Error fetching pets:", err);
-        setError("Failed to load pets");
+        setError("Failed to load pets.");
       }
     };
 
@@ -24,16 +30,20 @@ export default function PetsPage() {
 
   return (
     <div>
-      <h1>Pets Page</h1>
+    
+        <Header>Pets</Header>
+     
 
-      {error && <p>{error}</p>}
+      {error && <span>{error}</span>}
 
       {pets.length === 0 ? (
-        <p>No pets found.</p>
+        <span>No pets found.</span>
       ) : (
-        pets.map((pet) => (
+       <div>
+          {pets.map((pet) => (
             <PetCard key={pet.id} pet={pet} />
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

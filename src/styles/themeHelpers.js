@@ -1,0 +1,1 @@
+export const color = (key) => ({ theme }) => theme.colors[key];
