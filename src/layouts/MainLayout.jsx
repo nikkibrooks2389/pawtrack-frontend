@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { color, breakpoint } from "../styles/themeHelpers";
-import TopNavbar from "../components/TopNavBar";
+import TopNavBar from "../components/TopNavBar";
 const LayoutWrapper = styled.div`
   min-height: 100vh;
   background-color: ${color("background")};
@@ -25,7 +25,7 @@ const PageContent = styled.main`
 export default function MainLayout({ children }) {
   return (
     <LayoutWrapper>
-      <TopNavbar />
+      <TopNavBar />
       <PageContent>{children}</PageContent>
     </LayoutWrapper>
   );

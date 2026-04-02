@@ -24,7 +24,7 @@ const Brand = styled.h1`
   color: ${color("text")};
 `;
 
-export default function TopNavbar() {
+const TopNavBar = () =>  {
   return (
     <NavWrapper>
       <NavInner>
@@ -35,3 +35,5 @@ export default function TopNavbar() {
     </NavWrapper>
   );
 }
+
+export default TopNavBar;

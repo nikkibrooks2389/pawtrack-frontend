@@ -3,35 +3,17 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import PageWrapper from "../components/PageWrapper";
 import PageSection from "../components/PageSection";
-import { getPets, getBookings } from "../services/api";
-import { color, breakpoint } from "../styles/themeHelpers";
-import StyledButton from "../components/StyledButton";
-import AppDataGrid from "../components/AppDataGrid";
-
-const StatCard = styled.div`
-  flex: 1;
-  min-width: 200px;
-  background-color: ${color("background")};
-  border: 1px solid ${color("border")};
-  border-radius: 8px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const StatTitle = styled.p`
-  margin: 0;
-  font-size: 1rem;
-  color: ${color("textLight")};
-`;
-
-const StatNumber = styled.h2`
-  margin: 12px 0 0 0;
-  font-size: 2rem;
-  color: ${color("text")};
-`;
+import { breakpoint } from "../styles/themeHelpers";
+import StatCard from "../components/dashboard/StatCard";
+import DashboardActions from "../components/dashboard/DashboardActions";
+import UpcomingBookingsCards from "../components/dashboard/UpcomingBookingsCards";
+import UpcomingBookingsTable from "../components/dashboard/UpcomingbookingsTable";
+import { getPets } from "../features/pets/api";
+import { getBookings } from "../features/bookings/api";
+import {
+  getBookingsTodayCount,
+  getUpcomingBookings,
+} from "../features/dashboard/utils";
 
 const StatsGrid = styled.div`
   display: flex;
@@ -43,13 +25,6 @@ const StatsGrid = styled.div`
   }
 `;
 
-const ActionsRow = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-`;
-
 const SectionTitle = styled.h2`
   text-align: center;
   margin-bottom: 16px;
@@ -58,59 +33,38 @@ const SectionTitle = styled.h2`
 const TableNote = styled.p`
   text-align: center;
   margin-top: 0;
-  color: ${color("textLight")};
 `;
 
-const DashboardPage = () => {
+const DesktopOnly = styled.div`
+  display: block;
+
+  @media ${breakpoint("mobile")} {
+    display: none;
+  }
+`;
+
+const MobileOnly = styled.div`
+  display: none;
+
+  @media ${breakpoint("mobile")} {
+    display: block;
+  }
+`;
+
+export default function DashboardPage() {
   const navigate = useNavigate();
+
   const [petCount, setPetCount] = useState(0);
   const [bookings, setBookings] = useState([]);
-
-  const bookingsToday = bookings.filter((booking) => {
-    const today = new Date();
-    const date = new Date(booking.appointmentDate);
-
-    return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    );
-  }).length;
-
-  const totalBookings = bookings.length;
-
-  const upcomingBookings = bookings
-    .filter((booking) => new Date(booking.appointmentDate) >= new Date())
-    .sort(
-      (a, b) =>
-        new Date(a.appointmentDate).getTime() -
-        new Date(b.appointmentDate).getTime()
-    )
-    .slice(0, 5);
-
-  const bookingRows = upcomingBookings.map((booking) => ({
-    id: booking.id,
-    pet: booking.pet?.name || "N/A",
-    service: booking.service?.name || "N/A",
-    date: new Date(booking.appointmentDate).toLocaleDateString(),
-    time: new Date(booking.appointmentDate).toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "2-digit",
-    }),
-    status: booking.status,
-  }));
-
-  const bookingColumns = [
-  { field: "pet", headerName: "Pet", flex: 0.9 },
-  { field: "service", headerName: "Service", flex: 1.4 },
-  { field: "date", headerName: "Date", flex: 1 },
-  { field: "time", headerName: "Time", flex: 0.8 },
-  { field: "status", headerName: "Status", flex: 1 },
-];
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const run = async () => {
       try {
+        setIsLoading(true);
+        setError("");
+
         const [petsRes, bookingsRes] = await Promise.all([
           getPets(),
           getBookings(),
@@ -119,56 +73,64 @@ const DashboardPage = () => {
         setPetCount(petsRes.data.length);
         setBookings(bookingsRes.data);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchData();
+    run();
   }, []);
+
+  const bookingsToday = getBookingsTodayCount(bookings);
+  const totalBookings = bookings.length;
+  const upcomingBookings = getUpcomingBookings(bookings);
+
+  if (isLoading) {
+    return <PageWrapper title="Dashboard">Loading...</PageWrapper>;
+  }
+
+  if (error) {
+    return <PageWrapper title="Dashboard">{error}</PageWrapper>;
+  }
 
   return (
     <PageWrapper title="Dashboard">
       <PageSection>
         <StatsGrid>
-          <StatCard>
-            <StatTitle>Bookings Today</StatTitle>
-            <StatNumber>{bookingsToday}</StatNumber>
-          </StatCard>
-
-          <StatCard>
-            <StatTitle>Total Bookings</StatTitle>
-            <StatNumber>{totalBookings}</StatNumber>
-          </StatCard>
-
-          <StatCard>
-            <StatTitle>Total Pets</StatTitle>
-            <StatNumber>{petCount}</StatNumber>
-          </StatCard>
+          <StatCard title="Bookings Today" value={bookingsToday} />
+          <StatCard title="Total Bookings" value={totalBookings} />
+          <StatCard title="Total Pets" value={petCount} />
         </StatsGrid>
       </PageSection>
 
       <PageSection>
-        <ActionsRow>
-          <StyledButton>+ Add Pet</StyledButton>
-          <StyledButton>+ Add Service</StyledButton>
-          <StyledButton>+ Create Booking</StyledButton>
-        </ActionsRow>
+      <DashboardActions
+  onAddPet={() => navigate("/pets/new")}
+  onAddService={() => navigate("/services/new")}
+  onAddBooking={() => navigate("/bookings/new")}
+/>
       </PageSection>
 
       <PageSection>
         <SectionTitle>Upcoming Bookings</SectionTitle>
         <TableNote>*Selecting a row opens the booking details page*</TableNote>
 
-        <AppDataGrid
-          rows={bookingRows}
-          columns={bookingColumns}
-          onRowClick={(params) => {
-            navigate(`/bookings/${params.row.id}`);
-          }}
-        />
+        <DesktopOnly>
+          <UpcomingBookingsTable
+            bookings={upcomingBookings}
+            onRowClick={(id) => navigate(`/bookings/${id}`)}
+          />
+        </DesktopOnly>
+
+        <MobileOnly>
+          <UpcomingBookingsCards
+            bookings={upcomingBookings}
+            onView={(id) => navigate(`/bookings/${id}`)}
+          />
+        </MobileOnly>
       </PageSection>
     </PageWrapper>
   );
-};
-
-export default DashboardPage;
+}
