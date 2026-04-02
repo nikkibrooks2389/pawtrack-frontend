@@ -1,5 +1,5 @@
-const ServiucesPage = () => {
+const ServicesPage = () => {
   return <h1>Services</h1>;
 }   
 
-export default ServiucesPage;
+export default ServicesPage;
