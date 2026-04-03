@@ -106,10 +106,16 @@ export default function DashboardPage() {
       </PageSection>
 
       <PageSection>
-      <DashboardActions
-  onAddPet={() => navigate("/pets/new")}
-  onAddService={() => navigate("/services/new")}
-  onAddBooking={() => navigate("/bookings/new")}
+<DashboardActions
+  onAddPet={() =>
+    navigate("/pets/new", { state: { from: "/" } })
+  }
+  onAddService={() =>
+    navigate("/services/new", { state: { from: "/" } })
+  }
+  onAddBooking={() =>
+    navigate("/bookings/new", { state: { from: "/" } })
+  }
 />
       </PageSection>
 
@@ -120,14 +126,22 @@ export default function DashboardPage() {
         <DesktopOnly>
           <UpcomingBookingsTable
             bookings={upcomingBookings}
-            onRowClick={(id) => navigate(`/bookings/${id}`)}
+            onRowClick={(id) =>
+  navigate(`/bookings/${id}`, {
+    state: { from: "/" },
+  })
+}
           />
         </DesktopOnly>
 
         <MobileOnly>
           <UpcomingBookingsCards
             bookings={upcomingBookings}
-            onView={(id) => navigate(`/bookings/${id}`)}
+            onView={(id) =>
+  navigate(`/bookings/${id}`, {
+    state: { from: "/" },
+  })
+}
           />
         </MobileOnly>
       </PageSection>

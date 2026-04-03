@@ -48,3 +48,13 @@ export default function PetsPage() {
     </div>
   );
 }
+
+{/* <button
+  onClick={() =>
+    navigate("/pets/new", {
+      state: { from: "/pets" }
+    })
+  }
+>
+  Add Pet
+</button> */}
