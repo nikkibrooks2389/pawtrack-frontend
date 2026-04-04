@@ -177,7 +177,6 @@ export default function PetFormPage() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                required
                 type="number"
                 label="Age"
                 name="age"
@@ -243,8 +242,6 @@ export default function PetFormPage() {
                 name="state"
                 value={form.state}
                 onChange={handleInputChange}
-                onInvalid={setRequiredMessage("Use a 2-letter state code")}
-                onInput={clearValidationMessage}
                 inputProps={{
                   maxLength: 2,
                   pattern: "[A-Za-z]{2}",

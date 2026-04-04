@@ -4,13 +4,15 @@ import styled from "styled-components";
 import PageWrapper from "../components/PageWrapper";
 import PageSection from "../components/PageSection";
 import PageIntro from "../components/PageIntro";
-import PetCard from "../components/PetCard";
+import PetCard from "../components/pets/PetCard";
+import CardList from "../components/CardList";
 import AppDataGrid from "../components/AppDataGrid";
 import { getPets } from "../features/pets/api";
 import { breakpoint } from "../styles/themeHelpers";
+import { Button} from "@mui/material";
 
-const ActionsRow = styled.div`
-  margin-bottom: 16px;
+const Actions = styled.div`
+  margin: 20px 0;
 `;
 
 const DesktopOnly = styled.div`
@@ -29,11 +31,7 @@ const MobileOnly = styled.div`
   }
 `;
 
-const MobileCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
+
 
 export default function PetsPage() {
   const navigate = useNavigate();
@@ -83,17 +81,17 @@ export default function PetsPage() {
       <PageSection>
         <PageIntro subtitle="View and manage all pets" />
 
-        <ActionsRow>
-          <button
+        <Actions>
+          <Button variant="contained"
             onClick={() =>
               navigate("/pets/new", {
                 state: { from: "/pets" },
               })
             }
           >
-            Add Pet
-          </button>
-        </ActionsRow>
+            + Add Pet
+          </Button>
+        </Actions>
 
         {loading && <p>Loading...</p>}
         {error && <p>{error}</p>}
@@ -116,11 +114,21 @@ export default function PetsPage() {
             </DesktopOnly>
 
             <MobileOnly>
-              <MobileCards>
-                {pets.map((pet) => (
-                  <PetCard key={pet.id} pet={pet} />
-                ))}
-              </MobileCards>
+            <MobileOnly>
+  <CardList>
+    {pets.map((pet) => (
+      <PetCard
+        key={pet.id}
+        pet={pet}
+        onView={(id) =>
+          navigate(`/pets/${id}`, {
+            state: { from: "/pets" },
+          })
+        }
+      />
+    ))}
+  </CardList>
+</MobileOnly>
             </MobileOnly>
           </>
         )}

@@ -3,17 +3,19 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import PageWrapper from "../components/PageWrapper";
 import PageSection from "../components/PageSection";
+import AppDataGrid from "../components/AppDataGrid";
 import { breakpoint } from "../styles/themeHelpers";
 import StatCard from "../components/dashboard/StatCard";
 import DashboardActions from "../components/dashboard/DashboardActions";
-import UpcomingBookingsCards from "../components/dashboard/UpcomingBookingsCards";
-import UpcomingBookingsTable from "../components/dashboard/UpcomingbookingsTable";
+import CardList from "../components/CardList";
+import BookingCard from "../components/bookings/BookingCard";
 import { getPets } from "../features/pets/api";
 import { getBookings } from "../features/bookings/api";
 import {
   getBookingsTodayCount,
   getUpcomingBookings,
 } from "../features/dashboard/utils";
+import { formatDate, formatTime } from "../utils/dateUtils";
 
 const StatsGrid = styled.div`
   display: flex;
@@ -87,6 +89,23 @@ export default function DashboardPage() {
   const totalBookings = bookings.length;
   const upcomingBookings = getUpcomingBookings(bookings);
 
+  const bookingRows = upcomingBookings.map((booking) => ({
+    id: booking.id,
+    pet: booking.pet?.name || "—",
+    service: booking.service?.name || "—",
+    date: formatDate(booking.appointmentDate),
+    time: formatTime(booking.appointmentDate),
+    status: booking.status,
+  }));
+
+  const bookingColumns = [
+    { field: "pet", headerName: "Pet", flex: 0.9 },
+    { field: "service", headerName: "Service", flex: 1.4 },
+    { field: "date", headerName: "Date", flex: 1 },
+    { field: "time", headerName: "Time", flex: 0.8 },
+    { field: "status", headerName: "Status", flex: 1 },
+  ];
+
   if (isLoading) {
     return <PageWrapper title="Dashboard">Loading...</PageWrapper>;
   }
@@ -106,17 +125,17 @@ export default function DashboardPage() {
       </PageSection>
 
       <PageSection>
-<DashboardActions
-  onAddPet={() =>
-    navigate("/pets/new", { state: { from: "/" } })
-  }
-  onAddService={() =>
-    navigate("/services/new", { state: { from: "/" } })
-  }
-  onAddBooking={() =>
-    navigate("/bookings/new", { state: { from: "/" } })
-  }
-/>
+        <DashboardActions
+          onAddPet={() =>
+            navigate("/pets/new", { state: { from: "/" } })
+          }
+          onAddService={() =>
+            navigate("/services/new", { state: { from: "/" } })
+          }
+          onAddBooking={() =>
+            navigate("/bookings/new", { state: { from: "/" } })
+          }
+        />
       </PageSection>
 
       <PageSection>
@@ -124,25 +143,33 @@ export default function DashboardPage() {
         <TableNote>*Selecting a row opens the booking details page*</TableNote>
 
         <DesktopOnly>
-          <UpcomingBookingsTable
-            bookings={upcomingBookings}
-            onRowClick={(id) =>
-  navigate(`/bookings/${id}`, {
-    state: { from: "/" },
-  })
-}
+          <AppDataGrid
+            rows={bookingRows}
+            columns={bookingColumns}
+            onRowClick={(params) =>
+              navigate(`/bookings/${params.row.id}`, {
+                state: { from: "/" },
+              })
+            }
+            height={400}
+            pageSize={5}
           />
         </DesktopOnly>
 
         <MobileOnly>
-          <UpcomingBookingsCards
-            bookings={upcomingBookings}
-            onView={(id) =>
-  navigate(`/bookings/${id}`, {
-    state: { from: "/" },
-  })
-}
-          />
+          <CardList>
+            {upcomingBookings.map((booking) => (
+              <BookingCard
+                key={booking.id}
+                booking={booking}
+                onView={(id) =>
+                  navigate(`/bookings/${id}`, {
+                    state: { from: "/" },
+                  })
+                }
+              />
+            ))}
+          </CardList>
         </MobileOnly>
       </PageSection>
     </PageWrapper>

@@ -9,6 +9,7 @@ export default function BookingFormPage() {
 
   const isEditMode = Boolean(id);
   const backPath = location.state?.from || "/bookings";
+  const selectedPetId = location.state?.petId || "";
 
   return (
     <PageWrapper title={isEditMode ? "Edit Booking" : "Create Booking"}>
@@ -21,6 +22,10 @@ export default function BookingFormPage() {
               : "Create a new booking."
           }
         />
+
+        {!isEditMode && selectedPetId && (
+          <p>Creating booking for pet ID: {selectedPetId}</p>
+        )}
 
         <p>Booking form goes here.</p>
       </PageSection>

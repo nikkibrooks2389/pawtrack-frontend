@@ -8,6 +8,7 @@ const LayoutWrapper = styled.div`
 
 const PageContent = styled.main`
   width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
 

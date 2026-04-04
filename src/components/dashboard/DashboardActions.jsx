@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import StyledButton from "../StyledButton";
+import { Button } from "@mui/material";
 
 const ActionsRow = styled.div`
   display: flex;
@@ -8,14 +8,22 @@ const ActionsRow = styled.div`
   flex-wrap: wrap;
 `;
 
-const DashboardActions = ({ onAddPet, onAddService, onAddBooking }) =>  {
+const DashboardActions = ({ onAddPet, onAddService, onAddBooking }) => {
   return (
     <ActionsRow>
-      <StyledButton onClick={onAddPet}>+ Add Pet</StyledButton>
-      <StyledButton onClick={onAddService}>+ Add Service</StyledButton>
-      <StyledButton onClick={onAddBooking}>+ Create Booking</StyledButton>
+      <Button variant="contained" onClick={onAddPet}>
+        + Add Pet
+      </Button>
+
+      <Button variant="contained" onClick={onAddService}>
+        + Add Service
+      </Button>
+
+      <Button variant="contained" onClick={onAddBooking}>
+        + Create Booking
+      </Button>
     </ActionsRow>
   );
-}
+};
 
 export default DashboardActions;
