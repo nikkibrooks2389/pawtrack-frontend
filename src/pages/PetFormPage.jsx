@@ -1,10 +1,28 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Grid, MenuItem, TextField } from "@mui/material";
+import { Button, Grid, TextField } from "@mui/material";
 import PageWrapper from "../components/PageWrapper";
 import PageSection from "../components/PageSection";
 import PageIntro from "../components/PageIntro";
-import { createPet, getPetById, updatePet } from "../services/api";
+import { createPet, getPetById, updatePet } from "../features/pets/api";
+
+const initialForm = {
+  name: "",
+  type: "",
+  age: "",
+  ownerName: "",
+  phone: "",
+  address: "",
+  city: "",
+  state: "",
+  zip: "",
+  notes: "",
+};
+
+const setRequiredMessage = (message) => (e) =>
+  e.target.setCustomValidity(message);
+
+const clearValidationMessage = (e) => e.target.setCustomValidity("");
 
 export default function PetFormPage() {
   const navigate = useNavigate();
@@ -14,28 +32,18 @@ export default function PetFormPage() {
   const isEditMode = Boolean(id);
   const backPath = location.state?.from || "/pets";
 
-  const [form, setForm] = useState({
-    name: "",
-    type: "",
-    age: "",
-    ownerName: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    notes: "",
-  });
-
-  const [isLoadingPet, setIsLoadingPet] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isEditMode) return;
 
-    const run = async () => {
+    const loadPet = async () => {
       try {
-        setIsLoadingPet(true);
+        setLoading(true);
+        setError("");
 
         const res = await getPetById(id);
         const pet = res.data;
@@ -54,61 +62,67 @@ export default function PetFormPage() {
         });
       } catch (err) {
         console.error("Failed to load pet:", err);
+        setError("Could not load pet.");
       } finally {
-        setIsLoadingPet(false);
+        setLoading(false);
       }
     };
 
-    run();
+    loadPet();
   }, [id, isEditMode]);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "state" ? value.toUpperCase() : value,
     }));
   };
 
-  const handleCancel = () => {
-    navigate(backPath);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+    const ageNumber = Number(form.age);
 
     try {
-      setIsSaving(true);
+      setSaving(true);
+      setError("");
 
       const payload = {
-        ...form,
-        age: form.age === "" ? "" : Number(form.age),
+        id: isEditMode ? Number(id) : 0,
+        name: form.name.trim(),
+        type: form.type.trim(),
+        age: ageNumber,
+        ownerName: form.ownerName.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        state: form.state.trim(),
+        zip: form.zip.trim(),
+        notes: form.notes.trim(),
       };
 
       if (isEditMode) {
-        await updatePet(id, payload);
+        await updatePet(Number(id), payload);
       } else {
         await createPet(payload);
       }
 
-      navigate("/pets");
+      navigate(backPath);
     } catch (err) {
       console.error("Failed to save pet:", err);
-      alert("Failed to save pet.");
+      setError("Could not save pet.");
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  if (isLoadingPet) {
+  if (loading) {
     return (
       <PageWrapper title="Edit Pet">
         <PageSection>
-          <PageIntro
-            backPath={backPath}
-            subtitle="Loading pet information..."
-          />
+          <PageIntro backPath={backPath} subtitle="Loading..." />
         </PageSection>
       </PageWrapper>
     );
@@ -119,93 +133,95 @@ export default function PetFormPage() {
       <PageSection>
         <PageIntro
           backPath={backPath}
-          subtitle={
-            isEditMode
-              ? "Update this pet’s information."
-              : "Create a new pet profile."
-          }
+          subtitle={isEditMode ? "Update this pet" : "Create a new pet"}
         />
 
-        <form onSubmit={handleSubmit}>
-          <h3 style={{ marginTop: 0, marginBottom: "16px" }}>
-            Pet Information
-          </h3>
+        {error && (
+          <p style={{ color: "red", marginTop: 0, marginBottom: 16 }}>
+            {error}
+          </p>
+        )}
 
-          <Grid container spacing={3} style={{ marginBottom: "32px" }}>
+        <form onSubmit={handleSubmit}>
+          <h3>Pet Info</h3>
+
+          <Grid container spacing={3} style={{ marginBottom: 32 }}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                label="Pet Name"
+                required
+                label="Name"
                 name="name"
                 value={form.name}
-                onChange={handleChange}
-                required
+                onChange={handleInputChange}
+                onInvalid={setRequiredMessage("Name is required")}
+                onInput={clearValidationMessage}
+                inputProps={{ maxLength: 50 }}
               />
             </Grid>
 
             <Grid item xs={12} md={4}>
               <TextField
-                select
                 fullWidth
-                label="Pet Type"
+                required
+                label="Type"
                 name="type"
                 value={form.type}
-                onChange={handleChange}
-                required
-              >
-                <MenuItem value="Dog">Dog</MenuItem>
-                <MenuItem value="Cat">Cat</MenuItem>
-                <MenuItem value="Bird">Bird</MenuItem>
-                <MenuItem value="Rabbit">Rabbit</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </TextField>
+                onChange={handleInputChange}
+                onInvalid={setRequiredMessage("Type is required")}
+                onInput={clearValidationMessage}
+                inputProps={{ maxLength: 30 }}
+              />
             </Grid>
 
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                required
                 type="number"
                 label="Age"
                 name="age"
                 value={form.age}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                onInvalid={setRequiredMessage("Age is required")}
+                onInput={clearValidationMessage}
               />
             </Grid>
           </Grid>
 
-          <h3 style={{ marginTop: 0, marginBottom: "16px" }}>
-            Owner Information
-          </h3>
+          <h3>Owner Info</h3>
 
-          <Grid container spacing={3} style={{ marginBottom: "32px" }}>
+          <Grid container spacing={3} style={{ marginBottom: 32 }}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 label="Owner Name"
                 name="ownerName"
                 value={form.ownerName}
-                onChange={handleChange}
-                required
+                onChange={handleInputChange}
+                inputProps={{ maxLength: 50 }}
               />
             </Grid>
 
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                label="Phone Number"
+                label="Phone"
                 name="phone"
                 value={form.phone}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                inputProps={{ maxLength: 15 }}
               />
             </Grid>
 
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                label="Street Address"
+                label="Address"
                 name="address"
                 value={form.address}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                inputProps={{ maxLength: 100 }}
               />
             </Grid>
 
@@ -215,56 +231,60 @@ export default function PetFormPage() {
                 label="City"
                 name="city"
                 value={form.city}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                inputProps={{ maxLength: 50 }}
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={6} md={2}>
               <TextField
                 fullWidth
                 label="State"
                 name="state"
                 value={form.state}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                onInvalid={setRequiredMessage("Use a 2-letter state code")}
+                onInput={clearValidationMessage}
+                inputProps={{
+                  maxLength: 2,
+                  pattern: "[A-Za-z]{2}",
+                }}
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={6} md={2}>
               <TextField
                 fullWidth
-                label="Zip Code"
+                label="Zip"
                 name="zip"
                 value={form.zip}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
           </Grid>
 
-          <h3 style={{ marginTop: 0, marginBottom: "16px" }}>Notes</h3>
+          <h3>Notes</h3>
 
-          <div style={{ marginBottom: "32px" }}>
-            <TextField
-              fullWidth
-              multiline
-              minRows={4}
-              label="Notes"
-              name="notes"
-              value={form.notes}
-              onChange={handleChange}
-            />
-          </div>
+          <TextField
+            fullWidth
+            multiline
+            minRows={4}
+            label="Notes"
+            name="notes"
+            value={form.notes}
+            onChange={handleInputChange}
+            inputProps={{ maxLength: 250 }}
+            style={{ marginBottom: 24 }}
+          />
 
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <Button variant="outlined" type="button" onClick={handleCancel}>
+          <div style={{ display: "flex", gap: 12 }}>
+            <Button variant="outlined" onClick={() => navigate(backPath)}>
               Cancel
             </Button>
 
-            <Button type="submit" variant="contained" disabled={isSaving}>
-              {isSaving
-                ? "Saving..."
-                : isEditMode
-                ? "Update Pet"
-                : "Save Pet"}
+            <Button type="submit" variant="contained" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

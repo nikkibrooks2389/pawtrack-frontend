@@ -1,60 +1,130 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { getPets } from "../services/api";
+import PageWrapper from "../components/PageWrapper";
+import PageSection from "../components/PageSection";
+import PageIntro from "../components/PageIntro";
 import PetCard from "../components/PetCard";
-import { color } from "../styles/themeHelpers";
+import AppDataGrid from "../components/AppDataGrid";
+import { getPets } from "../features/pets/api";
+import { breakpoint } from "../styles/themeHelpers";
 
-
-const Header = styled.h1`
-  color: ${color("primary")};
+const ActionsRow = styled.div`
   margin-bottom: 16px;
 `;
 
+const DesktopOnly = styled.div`
+  display: block;
+
+  @media ${breakpoint("mobile")} {
+    display: none;
+  }
+`;
+
+const MobileOnly = styled.div`
+  display: none;
+
+  @media ${breakpoint("mobile")} {
+    display: block;
+  }
+`;
+
+const MobileCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
 export default function PetsPage() {
+  const navigate = useNavigate();
+
   const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchPets = async () => {
+    const loadPets = async () => {
       try {
-        const response = await getPets();
-        setPets(response.data);
+        setLoading(true);
+        setError("");
+
+        const res = await getPets();
+        setPets(res.data);
       } catch (err) {
-        console.error("Error fetching pets:", err);
-        setError("Failed to load pets.");
+        console.error("Error loading pets:", err);
+        setError("Could not load pets.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPets();
+    loadPets();
   }, []);
 
+  const rows = pets.map((pet) => ({
+    id: pet.id,
+    name: pet.name,
+    type: pet.type,
+    age: pet.age,
+    ownerName: pet.ownerName || "—",
+    phone: pet.phone || "—",
+  }));
+
+  const columns = [
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "type", headerName: "Type", flex: 1 },
+    { field: "age", headerName: "Age", width: 100 },
+    { field: "ownerName", headerName: "Owner", flex: 1 },
+    { field: "phone", headerName: "Phone", flex: 1 },
+  ];
+
   return (
-    <div>
-    
-        <Header>Pets</Header>
-     
+    <PageWrapper title="Pets">
+      <PageSection>
+        <PageIntro subtitle="View and manage all pets" />
 
-      {error && <span>{error}</span>}
+        <ActionsRow>
+          <button
+            onClick={() =>
+              navigate("/pets/new", {
+                state: { from: "/pets" },
+              })
+            }
+          >
+            Add Pet
+          </button>
+        </ActionsRow>
 
-      {pets.length === 0 ? (
-        <span>No pets found.</span>
-      ) : (
-       <div>
-          {pets.map((pet) => (
-            <PetCard key={pet.id} pet={pet} />
-          ))}
-        </div>
-      )}
-    </div>
+        {loading && <p>Loading...</p>}
+        {error && <p>{error}</p>}
+        {!loading && !error && pets.length === 0 && <p>No pets found.</p>}
+
+        {!loading && !error && pets.length > 0 && (
+          <>
+            <DesktopOnly>
+              <AppDataGrid
+                rows={rows}
+                columns={columns}
+                onRowClick={(params) =>
+                  navigate(`/pets/${params.row.id}`, {
+                    state: { from: "/pets" },
+                  })
+                }
+                height={400}
+                pageSize={5}
+              />
+            </DesktopOnly>
+
+            <MobileOnly>
+              <MobileCards>
+                {pets.map((pet) => (
+                  <PetCard key={pet.id} pet={pet} />
+                ))}
+              </MobileCards>
+            </MobileOnly>
+          </>
+        )}
+      </PageSection>
+    </PageWrapper>
   );
 }
-
-{/* <button
-  onClick={() =>
-    navigate("/pets/new", {
-      state: { from: "/pets" }
-    })
-  }
->
-  Add Pet
-</button> */}

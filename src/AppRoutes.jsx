@@ -1,16 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
-import DashboardPage from "../pages/DashboardPage";
-import PetsPage from "../pages/PetsPage";
-import PetFormPage from "../pages/PetFormPage";
-import PetDetailsPage from "../pages/PetDetailsPage";
-import ServicesPage from "../pages/ServicesPage";
-import ServiceFormPage from "../pages/ServiceFormPage";
-import ServiceDetailsPage from "../pages/ServiceDetailsPage";
-import BookingsPage from "../pages/BookingsPage";
-import BookingFormPage from "../pages/BookingFormPage";
-import BookingDetailsPage from "../pages/BookingDetailsPage";
-import ReportsPage from "../pages/ReportsPage";
+import MainLayout from "./layouts/MainLayout";
+import DashboardPage from "./pages/DashboardPage";
+import PetsPage from "./pages/PetsPage";
+import PetFormPage from "./pages/PetFormPage";
+import PetDetailsPage from "./pages/PetDetailsPage";
+import ServicesPage from "./pages/ServicesPage";
+import ServiceFormPage from "./pages/ServiceFormPage";
+import ServiceDetailsPage from "./pages/ServiceDetailsPage";
+import BookingsPage from "./pages/BookingsPage";
+import BookingFormPage from "./pages/BookingFormPage";
+import BookingDetailsPage from "./pages/BookingDetailsPage";
+import ReportsPage from "./pages/ReportsPage";
 
 export default function AppRoutes() {
   return (
