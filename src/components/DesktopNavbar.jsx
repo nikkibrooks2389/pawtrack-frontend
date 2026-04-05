@@ -28,7 +28,7 @@ const StyledLink = styled(NavLink)`
   }
 `;
 
-export default function DesktopNavbar() {
+export default function DesktopNavBar() {
   return (
     <NavLinks>
       <StyledLink to="/">Dashboard</StyledLink>

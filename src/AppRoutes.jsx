@@ -28,10 +28,10 @@ export default function AppRoutes() {
         <Route path="/services/:id" element={<ServiceDetailsPage />} />
         <Route path="/services/:id/edit" element={<ServiceFormPage />} />
 
-        <Route path="/bookings" element={<BookingsPage />} />
-        <Route path="/bookings/new" element={<BookingFormPage />} />
-        <Route path="/bookings/:id" element={<BookingDetailsPage />} />
-        <Route path="/bookings/:id/edit" element={<BookingFormPage />} />
+         <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/bookings/new" element={<BookingFormPage />} />
+          <Route path="/bookings/:id" element={<BookingDetailsPage />} />
+          <Route path="/bookings/:id/edit" element={<BookingFormPage />} />
 
         <Route path="/reports" element={<ReportsPage />} />
       </Routes>

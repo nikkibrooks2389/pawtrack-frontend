@@ -12,6 +12,7 @@ import BookingCard from "../components/bookings/BookingCard";
 import { getPetById, deletePet } from "../features/pets/api";
 import { getBookings } from "../features/bookings/api";
 import { breakpoint } from "../styles/themeHelpers";
+import { DesktopOnly, MobileOnly } from "../components/Responsive";
 
 const Header = styled.div`
   display: flex;
@@ -74,22 +75,6 @@ const SectionTitle = styled.h2`
 
 const TableNote = styled.p`
   margin-top: 0;
-`;
-
-const DesktopOnly = styled.div`
-  display: block;
-
-  @media ${breakpoint("mobile")} {
-    display: none;
-  }
-`;
-
-const MobileOnly = styled.div`
-  display: none;
-
-  @media ${breakpoint("mobile")} {
-    display: block;
-  }
 `;
 
 export default function PetDetailsPage() {

@@ -7,31 +7,13 @@ import PageIntro from "../components/PageIntro";
 import PetCard from "../components/pets/PetCard";
 import CardList from "../components/CardList";
 import AppDataGrid from "../components/AppDataGrid";
+import { DesktopOnly, MobileOnly } from "../components/Responsive";
 import { getPets } from "../features/pets/api";
-import { breakpoint } from "../styles/themeHelpers";
 import { Button} from "@mui/material";
 
 const Actions = styled.div`
   margin: 20px 0;
 `;
-
-const DesktopOnly = styled.div`
-  display: block;
-
-  @media ${breakpoint("mobile")} {
-    display: none;
-  }
-`;
-
-const MobileOnly = styled.div`
-  display: none;
-
-  @media ${breakpoint("mobile")} {
-    display: block;
-  }
-`;
-
-
 
 export default function PetsPage() {
   const navigate = useNavigate();
@@ -113,8 +95,7 @@ export default function PetsPage() {
               />
             </DesktopOnly>
 
-            <MobileOnly>
-            <MobileOnly>
+    <MobileOnly>
   <CardList>
     {pets.map((pet) => (
       <PetCard
@@ -129,7 +110,6 @@ export default function PetsPage() {
     ))}
   </CardList>
 </MobileOnly>
-            </MobileOnly>
           </>
         )}
       </PageSection>

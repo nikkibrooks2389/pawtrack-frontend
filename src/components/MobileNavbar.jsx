@@ -28,7 +28,7 @@ const MobileMenu = styled.div`
   gap: 8px;
   width: 100%;
   margin-top: 12px;
-  padding: 12px 0 0 0;
+  padding-top: 12px;
 `;
 
 const StyledLink = styled(NavLink)`
@@ -48,7 +48,7 @@ const StyledLink = styled(NavLink)`
   }
 `;
 
-export default function MobileNavbar() {
+export default function MobileNavBar() {
   const [open, setOpen] = useState(false);
 
   const closeMenu = () => setOpen(false);

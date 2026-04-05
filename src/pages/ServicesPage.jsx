@@ -13,26 +13,10 @@ import {
   formatServiceDuration,
 } from "../features/services/utils";
 import { getServices } from "../features/services/api";
-import { breakpoint } from "../styles/themeHelpers";
+import { DesktopOnly, MobileOnly } from "../components/Responsive";
 
 const Actions = styled.div`
   margin: 20px 0;
-`;
-
-const DesktopOnly = styled.div`
-  display: block;
-
-  @media ${breakpoint("mobile")} {
-    display: none;
-  }
-`;
-
-const MobileOnly = styled.div`
-  display: none;
-
-  @media ${breakpoint("mobile")} {
-    display: block;
-  }
 `;
 
 export default function ServicesPage() {
